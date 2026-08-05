@@ -43,9 +43,11 @@ scene.add(dirLight);
 fillLight.position.set(-5, 0, 5);
 scene.add(fillLight);*/
 
+
 /*const backLight = new THREE.DirectionalLight(0x88aaff, 0.4);
 backLight.position.set(0, -2, -10);
 scene.add(backLight);*/
+
 
 //6. ANIMATION LOOP
 function animate() {
