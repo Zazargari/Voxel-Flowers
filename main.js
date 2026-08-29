@@ -3,6 +3,9 @@ import * as THREE from 'three';
 // Global setup
 const rand = Math.random();
 const clock = new THREE.Clock();
+const day = 14;
+const month = 2;
+const year = 2002;
 
 // ---- HIGH RESOLUTION SETUP ----
 // Supersampling scale: increase for even sharper output (e.g., 3, 4)
@@ -64,7 +67,7 @@ const BeatingMaterial = new THREE.ShaderMaterial({
     uIceCyan: { value: new THREE.Color(0x5ccce9) },
     uIcyGlow: { value: new THREE.Color(0xa8ddf9) },
     uDeepIce: { value: new THREE.Color(0x115660) },
-    day: { value: 3/5 }  // NEW: controls blue intensity of icy glow
+    day: { value: day }  // NEW: controls blue intensity of icy glow
   },
   vertexShader: `
     uniform float uTime;
@@ -200,7 +203,7 @@ const BeatingMaterial = new THREE.ShaderMaterial({
       float spec2 = pow(max(dot(normal, normalize(light2 + viewDir)), 0.0), 128.0);
       
       // NEW: icy glow with user‑controlled blue channel
-      vec3 icyGlow = vec3(uIcyGlow.r, uIcyGlow.g, day);
+      vec3 icyGlow = vec3(uIcyGlow.r, uIcyGlow.g, day/17.0);
       
       vec3 specularGleam = (vec3(1.0) * spec1 * 1.0) + (icyGlow * spec2 * 0.6);
 
@@ -221,11 +224,10 @@ const BeatingMaterial = new THREE.ShaderMaterial({
   depthWrite: true,
   depthTest: true
 });
-const day = 3;
-const myColor = new THREE.Color(0.29, 0.2, day/15);
+const myColorAquarius = new THREE.Color(0.29, 0.2, day*0.02); //*****
 
-const StemMaterial = new THREE.MeshPhysicalMaterial({
-  color: myColor,         // Deep icy navy/teal
+const StemMaterialAquarius = new THREE.MeshPhysicalMaterial({ //*****
+  color: myColorAquarius,         // Deep icy navy/teal
   emissive: 0x227799,      // Subtle internal blue glow
   emissiveIntensity: 0.5,
   roughness: 0.1,          // Shiny surface
@@ -307,7 +309,7 @@ function createVoxelStem(length = rand, boxSize = 1, startX = 0, startY = 0) {
       currentY -= offsetY * boxSize;
     }
 
-    const voxel = new THREE.Mesh(geometry, StemMaterial);
+    const voxel = new THREE.Mesh(geometry, StemMaterialAquarius);
     voxel.position.set(currentX, currentY, -z);
     stemGroup.add(voxel);
   }
@@ -373,23 +375,33 @@ function generateBouquetFromBirthdate(day, month, year) {
   } else if (count === 22) {
     specialNumber2 = 1;   // distinct value for 22
   } else if (count === 11) {
-    specialNumber2 = 1.5;   // distinct value for 11
+    specialNumber2 = 1.2;   // distinct value for 11
   } else if (count < 11) {
-    specialNumber2 = 2;  // distinct value for smaller than 11
+    specialNumber2 = 1.5;  // distinct value for smaller than 11
   }
   // ---------------------------------------------------------
 
   // Original life calculation – you could also replace or combine it with specialNumber
-  const life = 1 - (count / 60);
+  //const life = 1 - (count / 60);
 
   for (let i = 0; i < count; i++) {
     let offsetX = 0;
     let offsetY = 0;
 
-    if (count > 1) {
+    if (count > 10) {
       // Now the offset is scaled by specialNumber as well, giving each case a different spread
-      offsetX = (Math.random() * (day * 2 + 1) - day) * specialNumber2;
-      offsetY = (Math.random() * (day * 2 + 1) - day) * specialNumber2;
+      offsetX = (Math.random() * (day*2/specialNumber2 + 1) - day/specialNumber2) * specialNumber2;
+      offsetY = (Math.random() * (day*2/specialNumber2 + 1) - day/specialNumber2) * specialNumber2;
+    }
+    if (6 < count < 11) {
+      // Now the offset is scaled by specialNumber as well, giving each case a different spread
+      offsetX = Math.random() * 25 -9;
+      offsetY = Math.random() * 25 -9;
+    }
+    if (0 < count < 7) {
+      // Now the offset is scaled by specialNumber as well, giving each case a different spread
+      offsetX = Math.random() * 25 -9;
+      offsetY = Math.random() * 25 -9;
     }
 
     const flower = createCompleteFlower(AquariusPoints, 11, 1, 200, offsetX, offsetY);
@@ -406,7 +418,7 @@ function generateBouquetFromBirthdate(day, month, year) {
 }
 
 // Initialize
-const bouquet = generateBouquetFromBirthdate(33,0,0);
+const bouquet = generateBouquetFromBirthdate(day,month,year);
 scene.add(bouquet);
 
 function savePicture(renderer, filename = 'screenshot.png') {
