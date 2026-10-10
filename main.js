@@ -3,13 +3,14 @@ import * as THREE from 'three';
 // Global setup
 const rand = Math.random();
 const clock = new THREE.Clock();
-const day = 10;
-const month = 10;
-const year = 2001;
+const day = 14;
+const month = 2;
+const year = 2002;
 
-// ---- HIGH RESOLUTION SETUP ----
+
+// Resolution set-up
 // Supersampling scale: increase for even sharper output (e.g., 3, 4)
-const RESOLUTION_SCALE = 2;
+const RESOLUTION_SCALE = 1;
 // -----------------------------
 
 // Scene setup
@@ -23,19 +24,19 @@ const camera = new THREE.PerspectiveCamera(
   3.0,
   1000
 );
-camera.position.set(0, -100, 40);
+camera.position.set(0, -75, 35);
 camera.lookAt(0, 25, -rand);
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
-// ---- HIGH RESOLUTION: set buffer size scaled, CSS size natural ----
+// Resolution
 const bufferWidth = window.innerWidth * RESOLUTION_SCALE;
 const bufferHeight = window.innerHeight * RESOLUTION_SCALE;
 renderer.setSize(bufferWidth, bufferHeight, false); // false = don't touch CSS
 renderer.domElement.style.width = window.innerWidth + 'px';
 renderer.domElement.style.height = window.innerHeight + 'px';
-renderer.setPixelRatio(0.5); // we handle scaling manually
+renderer.setPixelRatio(1); // we handle scaling manually
 // ------------------------------------------------------------------
 
 document.body.appendChild(renderer.domElement);
@@ -66,7 +67,10 @@ const BeatingMaterial = new THREE.ShaderMaterial({
     uChromeSilver: { value: new THREE.Color(0xefefe4) },
     uIceCyan: { value: new THREE.Color(0x5ccce9) },
     uIcyGlow: { value: new THREE.Color(0xa8ddf9) },
+    //uIcyGlow: { value: new THREE.Color(0xf911fd) },
     uDeepIce: { value: new THREE.Color(0x115660) },
+    //uDeepIce: { value: new THREE.Color(0x901156) },
+    uPinkRose: { value: new THREE.Color(0xf050f2) },
     day: { value: day }  // NEW: controls blue intensity of icy glow
   },
   vertexShader: `
@@ -97,6 +101,7 @@ const BeatingMaterial = new THREE.ShaderMaterial({
     uniform vec3 uIceCyan;
     uniform vec3 uIcyGlow;
     uniform vec3 uDeepIce;
+    uniform vec3 uPinkRose;
     uniform float day;  // NEW: user‑controlled blue value
 
     varying vec3 vNormal;
@@ -194,7 +199,9 @@ const BeatingMaterial = new THREE.ShaderMaterial({
 
       // 4. Subsurface Ice Glow (Internal scattering)
       float sss = pow(NdotV, 2.0) * 0.8;
-      vec3 internalGlow = mix(uDeepIce, uIceCyan, sss + sharpVeins);
+      vec3 internalGlow = mix(uDeepIce, uPinkRose, sss + sharpVeins);
+
+      //***
 
       // 5. Dual Metallic Specular Highlights
       vec3 light1 = normalize(vec3(1.0, 1.5, 1.0));
@@ -204,8 +211,8 @@ const BeatingMaterial = new THREE.ShaderMaterial({
       
       // NEW: icy glow with user‑controlled blue channel
       vec3 icyGlow = vec3(uIcyGlow.r, uIcyGlow.g, day/17.0);
-      
-      vec3 specularGleam = (vec3(1.0) * spec1 * 1.0) + (icyGlow * spec2 * 0.6);
+      //vec3 icyGlow = vec3(day/17.0, 0.05, uIcyGlow.b*0.30);
+      vec3 specularGleam = (vec3(1.0) * spec1 * 0.7) + (icyGlow * spec2 * 0.3);
 
       // 6. Final Layer Compositing
       vec3 baseMaterial = mix(internalGlow, uChromeSilver * chromeReflect, 0.85 + sharpVeins * 0.2);
@@ -225,6 +232,7 @@ const BeatingMaterial = new THREE.ShaderMaterial({
   depthTest: true
 });
 const myColorAquarius = new THREE.Color(0.29, 0.2, day*0.02); //*****
+const myColorPisces = new THREE.Color(0.75, 0.1, day*0.025);
 
 const StemMaterialAquarius = new THREE.MeshPhysicalMaterial({ //*****
   color: myColorAquarius,         // Deep icy navy/teal
@@ -240,22 +248,46 @@ const StemMaterialAquarius = new THREE.MeshPhysicalMaterial({ //*****
 
 
 // Points
-//11
+const AquariusPetals = 11;
 const AquariusPoints = [
-  { x: -2, y: 2, z: 0.25 }, { x: -7, y: 7, z: 0.25 }, { x: -8, y: 6, z: 0.75 },
-  { x: -6, y: 8, z: 0.75 }, { x: -5, y: 5, z: 1.5 }, { x: -4, y: 4, z: 1.5 },
-  { x: -6, y: 6, z: 0.75 }, { x: -3, y: 3, z: 0.75 }, { x: -4, y: 6, z: 1.75 },
-  { x: -6, y: 4, z: 1.75 }, { x: -4, y: 5, z: 1.25 }, { x: -5, y: 4, z: 1.25 },
-  { x: -3, y: 5, z: 1.75 }, { x: -5, y: 3, z: 1.75 }, { x: -6, y: 5, z: 1.0 },
-  { x: -5, y: 6, z: 1.0 }, { x: -7, y: 5, z: 1.5 }, { x: -5, y: 7, z: 1.5 },
-  { x: -7, y: 6, z: 1.0 }, { x: -6, y: 7, z: 1.0 }, { x: -3, y: 2, z: 1.0 },
-  { x: -2, y: 3, z: 1.0 }, { x: -4, y: 2, z: 1.5 }, { x: -2, y: 4, z: 1.5 },
-  { x: -4, y: 3, z: 1.0 }, { x: -3, y: 4, z: 1.0 }, { x: -8, y: 8, z: 0.25 },
-  { x: -8, y: 9, z: 0.5 }, { x: -7, y: 8, z: 0.5 }, { x: -9, y: 8, z: 0.5 },
-  { x: -8, y: 7, z: 0.5 }, { x: -9, y: 9, z: 0 }, { x: -1, y: 1, z: 0.25 },
-  { x: -1, y: 2, z: 0.5 }, { x: -2, y: 1, z: 0.5 }, { x: 0, y: 0, z: 0 }
+  { x: -2, y: 2, z: 0.25 }, 
+  { x: -7, y: 7, z: 0.25 }, 
+  { x: -8, y: 6, z: 0.75 },
+  { x: -6, y: 8, z: 0.75 }, 
+  { x: -5, y: 5, z: 1.5 }, 
+  { x: -4, y: 4, z: 1.5 },
+  { x: -6, y: 6, z: 0.75 }, 
+  { x: -3, y: 3, z: 0.75 }, 
+  { x: -4, y: 6, z: 1.75 },
+  { x: -6, y: 4, z: 1.75 }, 
+  { x: -4, y: 5, z: 1.25 }, 
+  { x: -5, y: 4, z: 1.25 },
+  { x: -3, y: 5, z: 1.75 }, 
+  { x: -5, y: 3, z: 1.75 }, 
+  { x: -6, y: 5, z: 1.0 },
+  { x: -5, y: 6, z: 1.0 }, 
+  { x: -7, y: 5, z: 1.5 }, 
+  { x: -5, y: 7, z: 1.5 },
+  { x: -7, y: 6, z: 1.0 }, 
+  { x: -6, y: 7, z: 1.0 }, 
+  { x: -3, y: 2, z: 1.0 },
+  { x: -2, y: 3, z: 1.0 }, 
+  { x: -4, y: 2, z: 1.5 }, 
+  { x: -2, y: 4, z: 1.5 },
+  { x: -4, y: 3, z: 1.0 }, 
+  { x: -3, y: 4, z: 1.0 }, 
+  { x: -8, y: 8, z: 0.25 },
+  { x: -8, y: 9, z: 0.5 }, 
+  { x: -7, y: 8, z: 0.5 }, 
+  { x: -9, y: 8, z: 0.5 },
+  { x: -8, y: 7, z: 0.5 }, 
+  { x: -9, y: 9, z: 0 }, 
+  { x: -1, y: 1, z: 0.25 },
+  { x: -1, y: 2, z: 0.5 }, 
+  { x: -2, y: 1, z: 0.5 }, 
+  { x: 0, y: 0, z: 0 }
 ];
-//4
+const PiscesPetals = 4;
 const PiscesPoints =[
   { x: 0, y: 0, z: 0 },
   { x: -4, y: 6, z: 4 },
@@ -312,7 +344,7 @@ const PiscesPoints =[
   { x: -8, y: 3, z: 4.5 },
   { x: -9, y: 9, z: 3 }
 ];
-//4
+const CancerPetals = 4;
 const CancerPoints = [
   { x: 0, y: 0, z: 0 },
   { x: 0, y: -1, z: 0.5 },
@@ -392,7 +424,7 @@ const CancerPoints = [
   { x: -8, y: -2, z: 7.5 },
   { x: -7, y: -6, z: 7.5 }
 ];
-//5
+const AriesPetals = 5;
 const AriesPoints = [
   { x: 0, y: 0, z: 0 },
   { x: 0, y: 1, z: 1 },
@@ -431,7 +463,7 @@ const AriesPoints = [
   { x: -8, y: 7, z: 2.5 },
   { x: -9, y: 9, z: 3 }
 ];
-//4
+const CapricornPetals = 4;
 const CapricornPoints = [
   { x: -4, y: 2, z: 4 },
   { x: -4, y: 3, z: 4 },
@@ -460,7 +492,7 @@ const CapricornPoints = [
   { x: 0, y: 0, z: 0 },
   { x: -1.5, y: -1.5, z: 8}
 ];
-//8
+const GeminiPetals = 8;
 const GeminiPoints = [
   { x: 2, y: -2, z: 1.5 },
   { x: 3, y: -3, z: 1.5 },
@@ -494,12 +526,29 @@ const GeminiPoints = [
   { x: 5, y: -3, z: 2 }
 ];
 
-//1
+const LeoPetals = 12;
 const LeoPoints = [
-  
+  { x: 0, y: 0, z: 0 },
+  { x: 0, y: 1, z: 1 },
+  { x: -1, y: 1, z: 2 },
+  { x: 0, y: 2, z: 2 },
+  { x: -1, y: 2, z: 2.5 },
+  { x: -2, y: 2, z: 3 },
+  { x: -2, y: 3, z: 3.5 },
+  { x: -3, y: 3, z: 4 },
+  { x: -4, y: 4, z: 4.5 },
+  { x: -5, y: 5, z: 5 },
+  { x: -6, y: 6, z: 5.5 },
+  { x: -7, y: 7, z: 6 },
+  { x: -8, y: 8, z: 6.5 },
+  { x: -9, y: 9, z: 7 },
+  { x: -1, y: 0, z: 1 },
+  { x: -2, y: 0, z: 2 },
+  { x: -2, y: 1, z: 2.5 },
+  { x: -3, y: 2, z: 3.5 }
 ];
 
-//4
+const LibraPetals = 4;
 const LibraPoints = [
   { x: 0, y: 0, z: 0 },
   { x: -0.5, y: 1, z: 0.5 },
@@ -578,7 +627,7 @@ const LibraPoints = [
   { x: 2.5, y: 4, z: 2 }
 ];
 
-//5
+const SagittariusPetals = 5;
 const SagittariusPoints = [
   { x: 8, y: 5, z: 3.5 },
   { x: 5, y: 8, z: 3.5 },
@@ -618,7 +667,7 @@ const SagittariusPoints = [
   { x: 0, y: 0, z: 0 }
 ];
 
-//8
+const TaurusPetals = 8;
 const TaurusPoints = [
   { x: -3, y: 2, z: 1 },
   { x: -3, y: 4, z: 1 },
@@ -660,7 +709,7 @@ const TaurusPoints = [
   { x: 0, y: 0, z: 0 }
 ];
 
-//5
+const VirgoPetals = 5;
 const VirgoPoints = [
   { x: 0, y: 1, z: 1 },
   { x: -1, y: 0, z: 1 },
@@ -728,7 +777,7 @@ const VirgoPoints = [
   { x: 0, y: 0, z: 0 }
 ];
 
-//8
+const ScorpioPetals = 8;
 const ScorpioPoints = [
   { x: -1, y: -1, z: 0 },
   { x: -2, y: -1, z: 0 },
@@ -758,6 +807,83 @@ const ScorpioPoints = [
   { x: -1, y: -2, z: 5.5 },
   { x: -2, y: -1, z: 5.5 }
 ];
+
+// Map sign name -> points & petals
+const ZODIAC_POINTS = {
+  Aries:       AriesPoints,
+  Taurus:      TaurusPoints,
+  Gemini:      GeminiPoints,
+  Cancer:      CancerPoints,
+  Leo:         LeoPoints,
+  Virgo:       VirgoPoints,
+  Libra:       LibraPoints,
+  Scorpio:     ScorpioPoints,
+  Sagittarius: SagittariusPoints,
+  Capricorn:   CapricornPoints,
+  Aquarius:    AquariusPoints,
+  Pisces:      PiscesPoints,
+};
+
+const ZODIAC_PETALS = {
+  Aries:       AriesPetals,
+  Taurus:      TaurusPetals,
+  Gemini:      GeminiPetals,
+  Cancer:      CancerPetals,
+  Leo:         LeoPetals,
+  Virgo:       VirgoPetals,
+  Libra:       LibraPetals,
+  Scorpio:     ScorpioPetals,
+  Sagittarius: SagittariusPetals,
+  Capricorn:   CapricornPetals,
+  Aquarius:    AquariusPetals,
+  Pisces:      PiscesPetals,
+};
+
+//Sign boundaries (last day of each sign)
+const ZODIAC_CUTOFFS = [
+  { sign: 'Capricorn',   end: [1, 19]  }, // Jan 1  – Jan 19
+  { sign: 'Aquarius',    end: [2, 18]  }, // Jan 20 – Feb 18
+  { sign: 'Pisces',      end: [3, 20]  }, // Feb 19 – Mar 20
+  { sign: 'Aries',       end: [4, 19]  }, // Mar 21 – Apr 19
+  { sign: 'Taurus',      end: [5, 20]  }, // Apr 20 – May 20
+  { sign: 'Gemini',      end: [6, 20]  }, // May 21 – Jun 20
+  { sign: 'Cancer',      end: [7, 22]  }, // Jun 21 – Jul 22
+  { sign: 'Leo',         end: [8, 22]  }, // Jul 23 – Aug 22
+  { sign: 'Virgo',       end: [9, 22]  }, // Aug 23 – Sep 22
+  { sign: 'Libra',       end: [10, 22] }, // Sep 23 – Oct 22
+  { sign: 'Scorpio',     end: [11, 21] }, // Oct 23 – Nov 21
+  { sign: 'Sagittarius', end: [12, 21] }, // Nov 22 – Dec 21
+  { sign: 'Capricorn',   end: [12, 31] }, // Dec 22 – Dec 31
+];
+
+//Lookup function
+function getZodiacSign(day, month, year) {
+  if (!Number.isInteger(day) || !Number.isInteger(month) ||
+      month < 1 || month > 12 || day < 1 || day > 31) {
+    throw new RangeError(`Invalid date: ${day}/${month}/${year}`);
+  }
+
+  for (const { sign, end } of ZODIAC_CUTOFFS) {
+    const [endMonth, endDay] = end;
+    if (month < endMonth || (month === endMonth && day <= endDay)) {
+      return sign; // first match wins
+    }
+  }
+  return 'Capricorn'; // unreachable safety net
+}
+
+let ZodiacSign   = null;
+let ZodiacPoints = null;
+let ZodiacPetals = null;
+
+function setZodiac(day, month, year) {
+  ZodiacSign   = getZodiacSign(day, month, year);
+  ZodiacPoints = ZODIAC_POINTS[ZodiacSign];
+  ZodiacPetals = ZODIAC_PETALS[ZodiacSign];
+  return ZodiacSign; // handy for logging / chaining
+}
+
+setZodiac(day, month, year);
 
 // Flower Head
 function createFlowerFromCornerPoints(points, petalCount = 4, boxSize = 1) {
@@ -801,12 +927,12 @@ function createVoxelStem(length = rand, boxSize = 1, startX = 0, startY = 0) {
       let offsetX = Math.floor(Math.random() * 3) - 1;
       let offsetY = Math.floor(Math.random() * 3) - 1;
 
-      // 60% chance to bias towards center if stem drifts too far out
-      if (Math.abs(currentX) > 1 && Math.random() < 0.6) {
-        offsetX = currentX > 0 ? 0.55 : -0.55;
+      // 70% chance to bias towards center if stem drifts too far out
+      if (Math.abs(currentX) > 1 && Math.random() < 0.8) {
+        offsetX = currentX > 0 ? 0.8 : -0.8;
       }
-      if (Math.abs(currentY) > 1 && Math.random() < 0.6) {
-        offsetY = currentY > 0 ? 0.55 : -0.55;
+      if (Math.abs(currentY) > 1 && Math.random() < 0.8) {
+        offsetY = currentY > 0 ? 0.8 : -0.8;
       }
 
       currentX -= offsetX * boxSize;
@@ -826,8 +952,8 @@ function createCompleteFlower(points, petalCount = 11, boxSize = 1, stemLength =
   const completeFlower = new THREE.Group();
 
   const head = createFlowerFromCornerPoints(points, petalCount, boxSize);
-  head.rotation.x = Math.random() * 0.8 - 0.4;
-  head.rotation.y = Math.random() * 0.8 - 0.4;
+  head.rotation.x = Math.random() * 0.6 - 0.4;
+  head.rotation.y = Math.random() * 0.6 - 0.4;
   head.position.x = headOffsetX;
   head.position.y = headOffsetY;
 
@@ -915,11 +1041,11 @@ function generateBouquetFromBirthdate(day, month, year) {
       offsetY = Math.random() * 25 -9;
     }
     //.............................................................................../////////////////////////////////////////////////////////////////////////////////////////////////
-    const flower = createCompleteFlower(PiscesPoints,4, 1, 200, offsetX, offsetY);
+    const flower = createCompleteFlower(ZodiacPoints,ZodiacPetals, 1, 100, offsetX, offsetY);
 
     if (count > 1) {
       // Z-position also scales with specialNumber for extra distinction
-      flower.position.z = (Math.random() * specialNumber*10)*10;
+      flower.position.z = (Math.random() * specialNumber*10)*13;
     }
 
     bouquetGroup.add(flower);
