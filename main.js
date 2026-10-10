@@ -3,9 +3,26 @@ import * as THREE from 'three';
 // Global setup
 const rand = Math.random();
 const clock = new THREE.Clock();
-const day = 14;
-const month = 2;
-const year = 2002;
+let day = 14;
+let month = 2;
+let year = 2002;
+
+
+// --- UI: date inputs + button ---
+const ui = document.createElement('div');
+ui.style.cssText = `
+  position: fixed; top: 10px; left: 10px; z-index: 1000;
+  display: flex; gap: 6px; align-items: center;
+  font: 12px system-ui, sans-serif; color: #eee;
+  background: rgba(0,0,0,0.55); padding: 8px 10px; border-radius: 6px;
+`;
+ui.innerHTML = `
+  <label>D <input id="in-day"   type="number" min="1" max="31" value="14" style="width:48px"></label>
+  <label>M <input id="in-month" type="number" min="1" max="12" value="2"  style="width:40px"></label>
+  <label>Y <input id="in-year"  type="number" min="1900" max="2100" value="2002" style="width:60px"></label>
+  <button id="rebuild" style="cursor:pointer">Rebuild</button>
+`;
+document.body.appendChild(ui);
 
 
 // Resolution set-up
@@ -1041,7 +1058,7 @@ function generateBouquetFromBirthdate(day, month, year) {
       offsetY = Math.random() * 25 -9;
     }
     //.............................................................................../////////////////////////////////////////////////////////////////////////////////////////////////
-    const flower = createCompleteFlower(ZodiacPoints,ZodiacPetals, 1, 100, offsetX, offsetY);
+    const flower = createCompleteFlower(ZodiacPoints,ZodiacPetals, 1, 125, offsetX, offsetY);
 
     if (count > 1) {
       // Z-position also scales with specialNumber for extra distinction
@@ -1054,9 +1071,28 @@ function generateBouquetFromBirthdate(day, month, year) {
   return bouquetGroup;
 }
 
-// Initialize
-const bouquet = generateBouquetFromBirthdate(day,month,year);
-scene.add(bouquet);
+let bouquet = null;
+
+function rebuildBouquet() {
+  // remove old bouquet from the scene (and free its geometries)
+  if (bouquet) {
+    scene.remove(bouquet);
+    bouquet.traverse(o => { if (o.isMesh) o.geometry?.dispose?.(); });
+  }
+
+  // recompute sign + points from the current day/month/year
+  setZodiac(day, month, year);
+  //console.log('Sign:', ZodiacSign); // sanity check
+
+  // update the shader uniform (blue channel of icy glow depends on day)
+  BeatingMaterial.uniforms.day.value = day;
+
+  // rebuild
+  bouquet = generateBouquetFromBirthdate(day, month, year);
+  scene.add(bouquet);
+}
+
+rebuildBouquet();
 
 function savePicture(renderer, filename = 'screenshot.png') {
     // Capture the canvas as a data URL
@@ -1070,11 +1106,24 @@ function savePicture(renderer, filename = 'screenshot.png') {
 function animate() {
   requestAnimationFrame(animate);
 
-  bouquet.rotation.z += 0.01;
+  if (bouquet) bouquet.rotation.z += 0.01;
   BeatingMaterial.uniforms.uTime.value = clock.getElapsedTime();
 
   renderer.render(scene, camera);
 }
+
+document.getElementById('rebuild').addEventListener('click', () => {
+  const d = parseInt(document.getElementById('in-day').value,   10);
+  const m = parseInt(document.getElementById('in-month').value, 10);
+  const y = parseInt(document.getElementById('in-year').value,  10);
+
+  if (!Number.isInteger(d) || !Number.isInteger(m) || !Number.isInteger(y)) return;
+
+  day = d;
+  month = m;
+  year = y;
+  rebuildBouquet();
+});
 
 animate();
 //savePicture(renderer, 'my-scene.png');
