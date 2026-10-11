@@ -3,11 +3,11 @@ import * as THREE from 'three';
 // Global setup
 const rand = Math.random();
 const clock = new THREE.Clock();
-let day = 13;
-let month = 9;
+let day = 12;
+let month = 2;
 let year = 2002;
 
-const AquariusColor = new THREE.Color(0.29, 0.35, day*0.02);
+const AquariusColor = new THREE.Color(0.29, 0.15, day*0.02);
 const PiscesColor = new THREE.Color(0.9, 0.1, day*0.005);
 const AriesColor = new THREE.Color(1.0, 0.005, day*0.001);
 const TaurusColor = new THREE.Color(0.1, 0.7, day*0.035);
@@ -20,7 +20,7 @@ const GeminiColor = new THREE.Color(0.85, 0.3, day*0.0005);
 const ScorpioColor = new THREE.Color(1.0, 0.1, day*0.0);
 const VirgoColor = new THREE.Color(0.85, 0.1, day*0.01);
 
-const AquariusColor02 = new THREE.Color(0x115690);
+const AquariusColor02 = new THREE.Color(0x1136e0);
 const PiscesColor02 = new THREE.Color(0xf78bdc);
 const AriesColor02 = new THREE.Color(0xff0000);
 const TaurusColor02 = new THREE.Color(0x106186);
@@ -33,7 +33,7 @@ const GeminiColor02 = new THREE.Color(0xe36e1b);
 const ScorpioColor02 = new THREE.Color(0xa2f2d4);
 const VirgoColor02 = new THREE.Color(0xd695fc);
 
-const AquariusColor03 = new THREE.Color(0xa8cdf9);
+const AquariusColor03 = new THREE.Color(0x386df9);
 const PiscesColor03 = new THREE.Color(0xf78bbc);
 const AriesColor03 = new THREE.Color(0xff0000);
 const TaurusColor03 = new THREE.Color(0x106136);
