@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const rand = Math.random();
 const clock = new THREE.Clock();
 let day = 12;
-let month = 2;
+let month = 10;
 let year = 2002;
 
 const AquariusColor = new THREE.Color(0.29, 0.15, day*0.02);
@@ -740,13 +740,13 @@ const ui = document.createElement('div');
 ui.style.cssText = `
   position: fixed; top: 10px; left: 10px; z-index: 1000;
   display: flex; gap: 6px; align-items: center;
-  font: 12px system-ui, sans-serif; color: #eee;
-  background: rgba(0,0,0,0.55); padding: 8px 10px; border-radius: 6px;
+  font: 12px roboto, sans-serif; color: #eee;
+  background: rgb(26, 26, 26); padding: 8px 10px; border-radius: 6px;
 `;
 ui.innerHTML = `
-  <label>D <input id="in-day"   type="number" min="1" max="31" value="13" style="width:48px"></label>
-  <label>M <input id="in-month" type="number" min="1" max="12" value="9"  style="width:40px"></label>
-  <label>Y <input id="in-year"  type="number" min="1900" max="2100" value="2002" style="width:60px"></label>
+  <label>D <input id="in-day"   type="number" min="1" max="31" value="13" style="width:48px, font: 48px roboto, sans-serif"></label>
+  <label>M <input id="in-month" type="number" min="1" max="12" value="9"  style="width:40px, font: 48px roboto, sans-serif"></label>
+  <label>Y <input id="in-year"  type="number" min="1900" max="2100" value="2002" style="width:60px, font: 60px roboto, sans-serif"></label>
   <button id="rebuild" style="cursor:pointer">Rebuild</button>
 `;
 document.body.appendChild(ui);
@@ -768,12 +768,14 @@ const camera = new THREE.PerspectiveCamera(
   3.0,
   1000
 );
-camera.position.set(0, -75, 35);
-camera.lookAt(0, 25, -rand);
+camera.position.set(0, -250, 80);
+camera.lookAt(0, -15, -rand);
+camera.zoom = 3.9;
+camera.updateProjectionMatrix();
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-
+//renderer.setClearColor(0x000000, 0);
 // Resolution
 const bufferWidth = window.innerWidth * RESOLUTION_SCALE;
 const bufferHeight = window.innerHeight * RESOLUTION_SCALE;
@@ -806,6 +808,8 @@ function onWindowResize() {
 
 // Custom Material (unchanged)
 const BeatingMaterial = new THREE.ShaderMaterial({
+  //transparent: true, // Often required for blending to work as expected
+  //blending: THREE.MultiplyBlending,
   uniforms: {
     uTime: { value: 0 },
     uChromeSilver: { value: new THREE.Color(0xefefe4) },
@@ -973,6 +977,8 @@ const BeatingMaterial = new THREE.ShaderMaterial({
 });
 
 const StemMaterialAquarius = new THREE.MeshPhysicalMaterial({ //*****
+  //transparent: true,
+  //blending: THREE.AdditiveBlending,
   color: ZodiacColor,         // Deep icy navy/teal
   emissive: 0x227799,      // Subtle internal blue glow
   emissiveIntensity: 0.5,
@@ -981,7 +987,7 @@ const StemMaterialAquarius = new THREE.MeshPhysicalMaterial({ //*****
   transmission: 0.8,       // Glass-like icy refraction
   thickness: 1.2,          // Depth of the refraction
   transparent: true,
-  opacity: 0.25
+  opacity: 0.35
 });
 
 
@@ -1141,7 +1147,7 @@ function generateBouquetFromBirthdate(day, month, year) {
       offsetY = Math.random() * 25 -9;
     }
     //.............................................................................../////////////////////////////////////////////////////////////////////////////////////////////////
-    const flower = createCompleteFlower(ZodiacPoints,ZodiacPetals, 1, 125, offsetX, offsetY);
+    const flower = createCompleteFlower(ZodiacPoints,ZodiacPetals, 1, 100, offsetX, offsetY);
 
     if (count > 1) {
       // Z-position also scales with specialNumber for extra distinction
