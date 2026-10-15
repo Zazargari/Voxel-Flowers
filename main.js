@@ -3,8 +3,8 @@ import * as THREE from 'three';
 // Global setup
 const rand = Math.random();
 const clock = new THREE.Clock();
-let day = 12;
-let month = 10;
+let day = 13;
+let month = 9;
 let year = 2002;
 
 const AquariusColor = new THREE.Color(0.29, 0.15, day*0.02);
@@ -759,7 +759,7 @@ const RESOLUTION_SCALE = 1;
 
 // Scene setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x232323);
+scene.background = new THREE.Color(0xffeeee);
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(
