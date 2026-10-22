@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const rand = Math.random();
 const clock = new THREE.Clock();
 let day = 13;
-let month = 9;
+let month = 1;
 let year = 2002;
 
 const AquariusColor = new THREE.Color(0.29, 0.15, day*0.02);
@@ -41,7 +41,7 @@ const LibraColor03 = new THREE.Color(0xf262b2);
 const SagittariusColor03 = new THREE.Color(0xeb710e);
 const LeoColor03 = new THREE.Color(0xffcc00);
 const CancerColor03 = new THREE.Color(0xf10000);
-const CapricornColor03 = new THREE.Color(0x59c0f9);
+const CapricornColor03 = new THREE.Color(0x6595f8);
 const GeminiColor03 = new THREE.Color(0xd33e1b);
 const ScorpioColor03 = new THREE.Color(0x97000e);
 const VirgoColor03 = new THREE.Color(0xb144b3);
@@ -739,15 +739,20 @@ setZodiac(day, month, year);
 const ui = document.createElement('div');
 ui.style.cssText = `
   position: fixed; top: 10px; left: 10px; z-index: 1000;
-  display: flex; gap: 6px; align-items: center;
+  display: flex; flex-direction: column; gap: 6px;
   font: 12px roboto, sans-serif; color: #eee;
   background: rgb(26, 26, 26); padding: 8px 10px; border-radius: 6px;
 `;
 ui.innerHTML = `
-  <label>D <input id="in-day"   type="number" min="1" max="31" value="13" style="width:48px, font: 48px roboto, sans-serif"></label>
-  <label>M <input id="in-month" type="number" min="1" max="12" value="9"  style="width:40px, font: 48px roboto, sans-serif"></label>
-  <label>Y <input id="in-year"  type="number" min="1900" max="2100" value="2002" style="width:60px, font: 60px roboto, sans-serif"></label>
-  <button id="rebuild" style="cursor:pointer">Rebuild</button>
+  <div style="display:flex; gap:6px; align-items:center;">
+    <label>D <input id="in-day"   type="number" min="1" max="31" value="13" style="width:48px, font: 48px roboto, sans-serif"></label>
+    <label>M <input id="in-month" type="number" min="1" max="12" value="9"  style="width:40px, font: 48px roboto, sans-serif"></label>
+    <label>Y <input id="in-year"  type="number" min="1900" max="2100" value="2002" style="width:60px, font: 60px roboto, sans-serif"></label>
+    <button id="rebuild" style="cursor:pointer">Rebuild</button>
+  </div>
+  <div style="text-align:center; font: 11px roboto, sans-serif; color:#ffdddd;">
+    Made by <a href="https://instagram.com/zazargari" target="_blank" rel="noopener" style="color:#ee8080; text-decoration:underline;">@zazargari</a> on Instagram
+  </div>
 `;
 document.body.appendChild(ui);
 
@@ -792,7 +797,7 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 10);
 dirLight.position.set(5, -10, 1);
 scene.add(dirLight);
 
-// Resize handler - now updates both buffer and CSS
+// Resize handler
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
   const w = window.innerWidth;
@@ -800,15 +805,14 @@ function onWindowResize() {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 
-  // Update buffer size (scaled) and CSS size (natural)
   renderer.setSize(w * RESOLUTION_SCALE, h * RESOLUTION_SCALE, false);
   renderer.domElement.style.width = w + 'px';
   renderer.domElement.style.height = h + 'px';
 }
 
-// Custom Material (unchanged)
+// Custom Material
 const BeatingMaterial = new THREE.ShaderMaterial({
-  //transparent: true, // Often required for blending to work as expected
+  //transparent: true, 
   //blending: THREE.MultiplyBlending,
   uniforms: {
     uTime: { value: 0 },
@@ -1187,12 +1191,20 @@ function rebuildBouquet() {
 rebuildBouquet();
 
 function savePicture(renderer, filename = 'screenshot.png') {
+  renderer.render(scene, camera);        // ← draw a fresh frame
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = renderer.domElement.toDataURL('image/png');
+  link.click();
+}
+
+/*function savePicture(renderer, filename = 'screenshot.png') {
     // Capture the canvas as a data URL
     const link = document.createElement('a');
     link.download = filename;
     link.href = renderer.domElement.toDataURL('image/png');
     link.click();
-}
+}*/
 
 // Render loop
 function animate() {
@@ -1218,4 +1230,7 @@ document.getElementById('rebuild').addEventListener('click', () => {
 });
 
 animate();
+window.addEventListener('keydown', (e) => {
+  if (e.key === 's' || e.key === 'S') savePicture(renderer, 'my-scene.png');
+});
 //savePicture(renderer, 'my-scene.png');
