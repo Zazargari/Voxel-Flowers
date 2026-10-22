@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const rand = Math.random();
 const clock = new THREE.Clock();
 let day = 13;
-let month = 1;
+let month = 9;
 let year = 2002;
 
 const AquariusColor = new THREE.Color(0.29, 0.15, day*0.02);
@@ -1190,20 +1190,12 @@ function rebuildBouquet() {
 
 rebuildBouquet();
 
-function savePicture(renderer, filename = 'screenshot.png') {
+/*function savePicture(renderer, filename = 'screenshot.png') {
   renderer.render(scene, camera);        // ← draw a fresh frame
   const link = document.createElement('a');
   link.download = filename;
   link.href = renderer.domElement.toDataURL('image/png');
   link.click();
-}
-
-/*function savePicture(renderer, filename = 'screenshot.png') {
-    // Capture the canvas as a data URL
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = renderer.domElement.toDataURL('image/png');
-    link.click();
 }*/
 
 // Render loop
